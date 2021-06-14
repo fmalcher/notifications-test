@@ -102,5 +102,8 @@
       }
     }
   },
-  "defaultProject": "notifications-test"
+  "defaultProject": "notifications-test",
+  "cli": {
+    "defaultCollection": "@ngrx/schematics"
+  }
 }
