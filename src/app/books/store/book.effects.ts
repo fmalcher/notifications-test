@@ -26,10 +26,10 @@ export class BookEffects {
     )
   }, { dispatch: false });
 
-  notificationOnSuccessError$ = createEffect(() => {
+  notificationOnSuccess$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BookActions.successAction),
-      tap(() => this.ns.notify('error', 'Erfolg!', 'books'))
+      tap(() => this.ns.notify('success', 'Erfolg!', 'books'))
     )
   }, { dispatch: false });
 
