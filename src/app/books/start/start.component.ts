@@ -12,12 +12,13 @@ import { errorAction, globalErrorAction, successAction } from '../store/book.act
 })
 export class StartComponent implements OnInit {
 
+  // Container für die lokalen Notifications
   @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
 
-  constructor(private store: Store, private ns: NotificationService, private kns: KendoNotificationService) {
-  }
+  constructor(private store: Store, private ns: NotificationService, private kns: KendoNotificationService) {}
   
   ngOnInit(): void {
+    // unseren Container für alle Notifications mit Scope `books` anmelden
     this.ns.addNotificationHost('books', this.container, this.kns);
   }
 

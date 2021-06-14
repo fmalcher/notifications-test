@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ViewContainerRef } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { NotificationService as KendoNotificationService, NotificationSettings } from "@progress/kendo-angular-notification";
@@ -9,15 +9,25 @@ export interface MyNotification {
   scope: string;
 }
 
+export interface NotificationHost {
+  container?: ViewContainerRef,
+  scope: string,
+  kns: KendoNotificationService
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
 
   private notifications$ = new Subject<MyNotification>();
-  private notificationHosts$ = new Subject<{ el: any, scope: string, kns: KendoNotificationService }>();
+  private notificationHosts$ = new Subject<NotificationHost>();
 
   constructor(private globalKns: KendoNotificationService) {
+    /**
+     * für jeden neu angemeldeten Host: nimm die Notifications für den jeweiligen Scope
+     * und zeige sie mit dem übergebenen Kendo-Service an
+     */
     this.notificationHosts$.pipe(
       mergeMap(host => this.getNotificationsForScope(host.scope).pipe(
         map((notification): { notification: NotificationSettings, kns: KendoNotificationService } => {
@@ -29,7 +39,7 @@ export class NotificationService {
               position: { horizontal: "center", vertical: "top" },
               animation: { type: "fade", duration: 400 },
               type: { style: notification.type, icon: true },
-              appendTo: host.el
+              appendTo: host.container
             },
             kns: host.kns
           }
@@ -39,18 +49,22 @@ export class NotificationService {
       kns.show(notification);
     });
 
-    this.notificationHosts$.next({ scope: 'global', el: undefined, kns: this.globalKns });
+    // globalen Scope anmelden
+    this.notificationHosts$.next({ scope: 'global', kns: this.globalKns });
   }
 
+  // sendet eine Notification
   notify(type: 'error' | 'success', text: string, scope = 'global') {
     this.notifications$.next({ type, text, scope });
   }
 
+  // gibt Observable mit Notifications für einen bestimmten Scope zurück
   private getNotificationsForScope(scope: string): Observable<MyNotification> {
     return this.notifications$.pipe(filter(n => n.scope === scope));
   }
 
-  addNotificationHost(scope: string, el: any, kns: KendoNotificationService) {
-    this.notificationHosts$.next({ scope, el, kns });
+  // zum Anmelden eines Containers für lokale Notifications
+  addNotificationHost(scope: string, container: ViewContainerRef, kns: KendoNotificationService) {
+    this.notificationHosts$.next({ scope, container, kns });
   }
 }
