@@ -6,6 +6,7 @@ export const loadBooks = createAction(
 
 export const successAction = createAction('[Book] Success');
 export const errorAction = createAction('[Book] Error');
+export const globalErrorAction = createAction('[Book] Global Error');
 
 
 
